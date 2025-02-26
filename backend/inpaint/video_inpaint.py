@@ -136,6 +136,8 @@ class VideoInpaint:
         self.use_half = True if self.use_fp16 else False
         if self.device == torch.device('cpu'):
             self.use_half = False
+        # 检查是否有多个GPU可用
+        self.multi_gpu = torch.cuda.device_count() > 1
         # Length of sub-video for long video inference.
         self.sub_video_length = sub_video_length
         # Length of local neighboring frames.'
@@ -157,7 +159,10 @@ class VideoInpaint:
 
     def init_raft_model(self):
         # set up RAFT and flow competition model
-        return RAFT_bi(os.path.join(config.VIDEO_INPAINT_MODEL_PATH, 'raft-things.pth'), self.device)
+        model = RAFT_bi(os.path.join(config.VIDEO_INPAINT_MODEL_PATH, 'raft-things.pth'), self.device)
+        if self.multi_gpu:
+            model = torch.nn.DataParallel(model)
+        return model
 
     def init_fix_flow_model(self):
         fix_flow_complete_model = RecurrentFlowCompleteNet(
@@ -165,13 +170,17 @@ class VideoInpaint:
         for p in fix_flow_complete_model.parameters():
             p.requires_grad = False
         fix_flow_complete_model.to(self.device)
+        if self.multi_gpu:
+            fix_flow_complete_model = torch.nn.DataParallel(fix_flow_complete_model)
         fix_flow_complete_model.eval()
         return fix_flow_complete_model
 
     def init_inpaint_model(self):
         # set up ProPainter model
-        return InpaintGenerator(model_path=os.path.join(config.VIDEO_INPAINT_MODEL_PATH, 'ProPainter.pth')).to(
-            self.device).eval()
+        model = InpaintGenerator(model_path=os.path.join(config.VIDEO_INPAINT_MODEL_PATH, 'ProPainter.pth')).to(self.device)
+        if self.multi_gpu:
+            model = torch.nn.DataParallel(model)
+        return model.eval()
 
     def inpaint(self, frames, mask):
         if isinstance(frames[0], np.ndarray):

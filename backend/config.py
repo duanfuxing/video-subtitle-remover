@@ -75,17 +75,17 @@ MODE可选算法类型
 - InpaintMode.PROPAINTER 算法： 需要消耗大量显存，速度较慢，对运动非常剧烈的视频效果较好
 """
 # 【设置inpaint算法】
-MODE = InpaintMode.STTN
+MODE = InpaintMode.PROPAINTER
 # 【设置像素点偏差】
 # 用于判断是不是非字幕区域(一般认为字幕文本框的长度是要大于宽度的，如果字幕框的高大于宽，且大于的幅度超过指定像素点大小，则认为是错误检测)
-THRESHOLD_HEIGHT_WIDTH_DIFFERENCE = 10
+THRESHOLD_HEIGHT_WIDTH_DIFFERENCE = 20
 # 用于放大mask大小，防止自动检测的文本框过小，inpaint阶段出现文字边，有残留
-SUBTITLE_AREA_DEVIATION_PIXEL = 20
+SUBTITLE_AREA_DEVIATION_PIXEL = 40
 # 同于判断两个文本框是否为同一行字幕，高度差距指定像素点以内认为是同一行
 THRESHOLD_HEIGHT_DIFFERENCE = 20
 # 用于判断两个字幕文本的矩形框是否相似，如果X轴和Y轴偏差都在指定阈值内，则认为时同一个文本框
-PIXEL_TOLERANCE_Y = 20  # 允许检测框纵向偏差的像素点数
-PIXEL_TOLERANCE_X = 20  # 允许检测框横向偏差的像素点数
+PIXEL_TOLERANCE_Y = 30  # 允许检测框纵向偏差的像素点数
+PIXEL_TOLERANCE_X = 30  # 允许检测框横向偏差的像素点数
 # ×××××××××× 通用设置 end ××××××××××
 
 # ×××××××××× InpaintMode.STTN算法设置 start ××××××××××
@@ -108,13 +108,13 @@ PIXEL_TOLERANCE_X = 20  # 允许检测框横向偏差的像素点数
 效果：设置越大速度越慢，但效果越好
 注意：要保证STTN_MAX_LOAD_NUM大于STTN_NEIGHBOR_STRIDE和STTN_REFERENCE_LENGTH
 """
-STTN_SKIP_DETECTION = True
+STTN_SKIP_DETECTION = False
 # 参考帧步长
-STTN_NEIGHBOR_STRIDE = 5
+STTN_NEIGHBOR_STRIDE = 1
 # 参考帧长度（数量）
-STTN_REFERENCE_LENGTH = 10
+STTN_REFERENCE_LENGTH = 60
 # 设置STTN算法最大同时处理的帧数量
-STTN_MAX_LOAD_NUM = 50
+STTN_MAX_LOAD_NUM = 60
 if STTN_MAX_LOAD_NUM < STTN_REFERENCE_LENGTH * STTN_NEIGHBOR_STRIDE:
     STTN_MAX_LOAD_NUM = STTN_REFERENCE_LENGTH * STTN_NEIGHBOR_STRIDE
 # ×××××××××× InpaintMode.STTN算法设置 end ××××××××××
@@ -123,7 +123,7 @@ if STTN_MAX_LOAD_NUM < STTN_REFERENCE_LENGTH * STTN_NEIGHBOR_STRIDE:
 # 【根据自己的GPU显存大小设置】最大同时处理的图片数量，设置越大处理效果越好，但是要求显存越高
 # 1280x720p视频设置80需要25G显存，设置50需要19G显存
 # 720x480p视频设置80需要8G显存，设置50需要7G显存
-PROPAINTER_MAX_LOAD_NUM = 70
+PROPAINTER_MAX_LOAD_NUM = 100
 # ×××××××××× InpaintMode.PROPAINTER算法设置 end ××××××××××
 
 # ×××××××××× InpaintMode.LAMA算法设置 start ××××××××××
